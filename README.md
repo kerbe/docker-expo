@@ -21,7 +21,10 @@ computer directly.
 Running expo development environment is done like this (command works in WSL, adjust
 accordingly if you use PowerShell or CMD while in Windows):
 ```
-docker run -it --rm -p 19000:19000 -p 19001:19001 -p 19002:19002 -v "$PWD:/app" -e REACT_NATIVE_PACKAGER_HOSTNAME=192.168.1.101 kerbe/expo start
+docker run -it --rm -p 19000:19000 -p 19001:19001 -p 19002:19002 -v "$PWD:/app" \
+-e REACT_NATIVE_PACKAGER_HOSTNAME=192.168.1.101 \
+-e EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0 \
+--name=expo kerbe/expo start
 ```
 
 Here port 19000 is for actual application port, which needs to be open for your mobile.
@@ -32,3 +35,9 @@ Automatic browser opening doesn't obviously work, but you can open it yourself i
 Set REACT_NATIVE_PACKAGER_HOSTNAME to be your local IP address. If that is not set,
 Expo will bind to Docker container local IP. That IP isn't accessible for your 
 mobile phone, even if it is in same WLAN.
+
+Set EXPO_DEVTOOLS_LISTEN_ADDRESS to 0.0.0.0. Current version of expo-cli listens only 127.0.0.1,
+which doesn't work for Docker environment. Those forwarded ports need to be listened by
+containers internal ip, so we listen all addresses inside container with 0.0.0.0.
+
+Setting name for container makes it easier to work with docker-windows-volume-watcher helpers.
