@@ -41,3 +41,6 @@ which doesn't work for Docker environment. Those forwarded ports need to be list
 containers internal ip, so we listen all addresses inside container with 0.0.0.0.
 
 Setting name for container makes it easier to work with docker-windows-volume-watcher helpers.
+
+## Contributing
+Having problems with this image? Want to improve it somehow? Open issue or pull request!
