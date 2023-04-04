@@ -1,19 +1,18 @@
 # docker-expo
-Dockerized Expo application for making cross-platform mobile apps. This docker 
-container has facebook/watchman ( https://github.com/facebook/watchman ) installedi
-as well. Watchman is used to detect changes in files, and doing automatic code
-reload / recompile in Expo.
+Dockerized Expo application for making cross-platform mobile apps.
 
-I haven't tested this docker container on Linux or Mac environment, I have developed
-this for my Win10 Pro environment. For hot reloading you also need extra application
-to transfer filechange notifications to container. This can be achieved for example with
-either of these:
-  * https://github.com/zippoxer/docker-windows-volume-watcher
-  * https://github.com/merofeev/docker-windows-volume-watcher
-
-I have used myself first one, which is written in Go.
+# Watchman not included anymore
+This docker container used to have facebook/watchman installed, but it seems to have became unneeded.
+These days changes in files are detected, even when expo is running inside docker container.
+Old Dockerfile has been renamed to `Dockerfile-watchman`, if anyone finds urge to use it.
+However facebook/watchman ( https://github.com/facebook/watchman ) has also received updates,
+so old dockerfile and my kerbe/watchman docker image doesn't work properly.
 
 ## Usage of this Docker container
+Expo has changed it's `expo-cli` tooling, and moved from global expo-cli to project based install.
+Current best practice is to run `npx expo start`, and using `expo-cli` gives warning. 
+This docker container is able to work in both modes, examples given below.
+### Old expo-cli way
 You pull this container, and then you have expo-cli in your possession. You can
 either init your project with container, or with expo-cli installed on your 
 computer directly.
@@ -21,26 +20,37 @@ computer directly.
 Running expo development environment is done like this (command works in WSL, adjust
 accordingly if you use PowerShell or CMD while in Windows):
 ```
-docker run -it --rm -p 19000:19000 -p 19001:19001 -p 19002:19002 -v "$PWD:/app" \
+docker run -it --rm -p 19000:19000 -p 19001:19001 -v "$PWD:/app" \
 -e REACT_NATIVE_PACKAGER_HOSTNAME=192.168.1.101 \
--e EXPO_DEVTOOLS_LISTEN_ADDRESS=0.0.0.0 \
 --name=expo kerbe/expo start
 ```
 
 Here port 19000 is for actual application port, which needs to be open for your mobile.
 Port 19001 is default Metro Bundler port.
-Port 19002 is for Expo Devtools, accessible by browser.
-Automatic browser opening doesn't obviously work, but you can open it yourself in your local IP.
 
 Set REACT_NATIVE_PACKAGER_HOSTNAME to be your local IP address. If that is not set,
 Expo will bind to Docker container local IP. That IP isn't accessible for your 
 mobile phone, even if it is in same WLAN.
 
-Set EXPO_DEVTOOLS_LISTEN_ADDRESS to 0.0.0.0. Current version of expo-cli listens only 127.0.0.1,
-which doesn't work for Docker environment. Those forwarded ports need to be listened by
-containers internal ip, so we listen all addresses inside container with 0.0.0.0.
+Setting name for container makes it easier to work with further docker commands.
 
-Setting name for container makes it easier to work with docker-windows-volume-watcher helpers.
+### New npx expo way
+Create small runner script in your application project root, named `apprunner.sh`:
+```
+#!/bin/bash
+npx expo start
+```
+
+Then give it run permissions: `chmod +x ./apprunner.sh`
+
+Now you can overwrite default entrypoint with following:
+```
+docker run -it --rm -p 19000:19000 -p 19001:19001 -v "$PWD:/app" \
+-e REACT_NATIVE_PACKAGER_HOSTNAME=192.168.1.101 \
+--name=expo --entrypoint "./apprunner.sh" kerbe/expo
+```
+
+Rest of the info from old expo-cli way applies.
 
 ## Contributing
 Having problems with this image? Want to improve it somehow? Open issue or pull request!

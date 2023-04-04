@@ -1,7 +1,4 @@
-FROM node:lts
-
-RUN apt-get update && apt-get install -y sudo
-RUN echo "node ALL=NOPASSWD: /usr/local/bin/npm,/usr/local/bin/yarn" > /etc/sudoers.d/node
+FROM kerbe/watchman
 
 USER node
 
